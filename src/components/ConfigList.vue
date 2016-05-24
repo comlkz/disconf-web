@@ -96,7 +96,7 @@
 		</div>
                             
   </modal>
-   <modal :show.sync="showZkInfo" title="配置详情" width="700px">
+   <modal :show.sync="showZkInfo" title="配置详情" :width="900">
         <div class="modal-body" slot="modal-body">
         <div class="row">
            <table class="table table-hover" >
@@ -108,9 +108,9 @@
                             </tr>
                               <tr v-for="item in zkList">                    
                                 <td style="width:100px;">{{item.machine}}</td>
-                                <td style="width:550px;">{{item.value}}</td> 
+                                <td style="width:550px;" ><pre style="width:550px;">{{item.value}}</pre></td>
                                 <td style="width:50px;">
-                                    <span v-if="item.errorList ==[]">正常</span>
+                                    <span v-if="item.errorList.length==0">正常</span>
                                      <span v-else>不正常</span>
                                 </td>
                             </tr>
