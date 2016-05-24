@@ -54,7 +54,11 @@
         <!-- Page Sidebar -->
         <div class="page-sidebar" id="sidebar" :class="{'menu-compact':menucompact==true,'hide':hide==true}">
             <!-- Page Sidebar Header-->
+            <div class="sidebar-header-wrapper">
+                <input type="text" class="searchinput" v-model="searchKey">
+                <i class="searchicon fa fa-search"></i>
 
+            </div>
             <!-- /Page Sidebar Header -->
             <!-- Sidebar Menu -->
             <ul class="nav sidebar-menu">
@@ -89,6 +93,8 @@ export default {
       itemIndex:-1,
         menucompact:false,
         showOpen:false,
+        searchKey:null,
+        items:[],
     }
   },
    props:{
@@ -116,7 +122,7 @@ export default {
                                     
                 }
                     this.functions = apiItems;
-
+                    this.items = apiItems;
             });
       },
 	  showDrop(){
@@ -131,6 +137,22 @@ export default {
 		    })
       }
   },
+    watch:{
+        searchKey(){
+            var functions=[];
+            if(this.searchKey == null || this.searchKey == ''){
+                this.functions = this.items;
+            }else {
+                for (var i = 0; i < this.items.length; i++) {
+                    var item = this.items[i];
+                    if (item.name.indexOf(this.searchKey) > -1) {
+                        functions.push(item);
+                    }
+                }
+                this.functions = functions;
+            }
+        }
+    },
   computed:{
       hide(){
           if(screen.width<600 && this.menucompact){
