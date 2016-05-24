@@ -24,9 +24,23 @@ export function doPost(url,params){
 	return qwest.post(url,params);
 }
 
+export function doPost(url,params,config){
+
+	var config={cache:true};
+	if(params == null){
+		params = {};
+	}
+	return qwest.post(url,params,config);
+}
+
 export function doPut(url,params){
 	
 	return qwest.put(url,params);
+}
+
+export function doPut(url,params,config){
+	
+	return qwest.put(url,params,config);
 }
 
 export function doDel(url){

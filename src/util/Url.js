@@ -57,4 +57,4 @@ export var CHECK_LOGIN = CONTEXT +"/api/account/session";
 /*退出 */
 export var SIGN_OUT = CONTEXT +"/api/account/signout";
 
-export var ZK_INFO = "/api/zoo/zkdeplo";
+export var ZK_INFO = "/api/zoo/zkdeploy";

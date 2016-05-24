@@ -32,16 +32,12 @@
                                     <li ><a v-link="{path:'newApp'}" @click="showOpen=false">新建APP</a></li>
                                     <li><a v-link="{path:'newConfigItem'}" @click="showOpen=false">新建配置项</a></li>
                                    <li ><a v-link="{path:'newConfigFile'}" @click="showOpen=false">新建配置文件</a></li>
-                                   
+                                   <li > <a @click="signout()">注销</a></li>
                                 </ul>
                                 <!--/Login Area Dropdown-->
                             </li>
                     </ul>
-                    <div class="setting">
-                        <a id="logOut" title="logOut" @click="signout()">
-                            <i class="icon glyphicon glyphicon-log-out" ></i>
-                        </a>
-                    </div>
+
                     <div class="setting-container">
                    
                 </div>

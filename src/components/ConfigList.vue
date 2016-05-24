@@ -1,9 +1,7 @@
 <template>
 	<div class="page-breadcrumbs">
     <ul class="breadcrumb">
-        <li>
-            {{titleObj.appName}} * {{titleObj.envName}} * {{titleObj.version}}
-        </li>
+       
        
         <li>
             配置文件修改
@@ -20,15 +18,25 @@
 					     <tab v-for="item in headers" :header="item.name" > 
                                  <div class="row">
                                   <div class="col-lg-8 col-sm-8 col-xs-12">
-                                          		{{titleObj.envName}}环境
+                                          		环境：{{item.name}}
 				                                APP:{{titleObj.appName}}
+                                                version:{{versionId}}
 
                                       </div>
                                       <div class="col-lg-4 col-sm-4 col-xs-12">
                                           		<a class="btn btn-primary" href="/api/web/config/downloadfilebatch?appId={{appId}}&envId={{item.id}}&&version={{versionId}}">批量下载</a>
-				                                <a class="btn btn-primary" v-link="{path:'/zkInfo',query: { appId: appId,envId:item.id ,version:versionId}}" >ZK部署情况</a>
+				                                <a class="btn btn-primary"  @click="showZkDetail(appId,item.id,versionId)">ZK部署情况</a>
 
                                       </div>
+                                 </div>
+                                 <div class="row" v-show="hiddenZk">
+                                    
+                                       <div id="zk_deploy_info" style="padding-bottom:20px;">
+                                            <pre id="zk_deploy_info_pre" style="min-height:200px">
+                                                {{zkDetail}}
+                                            </pre>
+                                      </div>
+                                     
                                  </div>
 							    <table class="table table-hover" >
 		                        <thead>
@@ -77,28 +85,31 @@
 		</div>
 	</div>
 
- <modal :show.sync="showInfo" title="配置详情">
+ <modal :show.sync="showInfo" title="配置详情" width="700px"> 
         <div class="modal-body" slot="modal-body">
-            {{content}}
+            <pre style="width:680px">
+                {{content}}
+            </pre>
         </div>
         <div class="modal-footer" slot="modal-footer">
 				<a class="btn btn-primary"  @click="showInfo=false">关闭</a>
 		</div>
                             
   </modal>
-   <modal :show.sync="showZkInfo" title="配置详情">
+   <modal :show.sync="showZkInfo" title="配置详情" width="700px">
         <div class="modal-body" slot="modal-body">
+        <div class="row">
            <table class="table table-hover" >
                     <thead>
                             <tr>                    
-                                <td style="width:25%">机器</td>
-                                <td style="width:50%">值</td>
-                                <td style="width:25%">状态</td>
+                                <td style="width:100px;">机器</td>
+                                <td style="width:550px;">值</td>
+                                <td style="width:50px;">状态</td>
                             </tr>
                               <tr v-for="item in zkList">                    
-                                <td style="width:25%">{{item.machine}}</td>
-                                <td style="width:50%">{{item.value}}</td> 
-                                <td style="width:25%">
+                                <td style="width:100px;">{{item.machine}}</td>
+                                <td style="width:550px;">{{item.value}}</td> 
+                                <td style="width:50px;">
                                     <span v-if="item.errorList ==[]">正常</span>
                                      <span v-else>不正常</span>
                                 </td>
@@ -108,13 +119,14 @@
                     <tbody>
                     </tbody>
             </table>
+            </div>
         </div>
         <div class="modal-footer" slot="modal-footer">
 				<a class="btn btn-primary"  @click="showZkInfo=false">关闭</a>
 		</div>
                             
   </modal>
-  <modal :show.sync="showDel" title="配置详情">
+  <modal :show.sync="showDel" title="删除配置">
         <div class="modal-body" slot="modal-body">
             确定要删除配置文件吗
         </div>
@@ -142,24 +154,7 @@ export default {
     data ({ to, next }) {
       this.appId =to.query.appId;
       this.versionId = to.query.version;
-      /*if(to.query.envId == null){
-          this.activeTab = 0;
-      }else{
-          var envId = to.query.envId;
-          if(this.headers ==[]){
-              this.loadEnv();
-              
-          }
-          if(this.headers !=[]){
-              for(var i=0;i<headers.length;i++){
-                  var item = headers[i];
-                  if(item.id == envId){
-                      this.activeTab = envId;
-                      break;
-                  }
-              }
-          }
-      }*/
+
        this.loadData();
 
     }
@@ -179,7 +174,9 @@ export default {
      envId:null,
      selectItem:-1,
      versionId:null,
-     titleObj:null
+     titleObj:null,
+     zkDetail:null,
+     hiddenZk:false,
     }
   },
   components: {
@@ -192,13 +189,14 @@ export default {
   ready () {
     
       this.loadEnv();
+     
 
    
   },
   methods :{
       loadEnv(){
           var params={};
-           ajaxUtil.doGet(Url.ENV_LIST,params).then((xhr,response) => {
+          qwest.get(Url.ENV_LIST,params).then((xhr,response) => {
                 var envList = response;
                 var headers=[];
                 for(var i = 0 ;i <envList.page.result.length;i++){
@@ -206,10 +204,14 @@ export default {
                     headers.push(envList.page.result[i]);
                 }
                 this.headers = headers;
-          });
+                this.loadData();
+          }) 
       },
 	  loadData(){
+          console.log("start load data");
           if(this.headers.length >0){
+                        console.log("begin load data");
+
            var envId = this.headers[this.activeTab].id;
            var params={};
            params.appId = this.appId;
@@ -218,10 +220,11 @@ export default {
            ajaxUtil.doGet(Url.CONFIG_LIST,params).then((xhr,response) => {
                 var configObj = response;
                 this.items = configObj.page.result;
-                var titleObj = null;
+                var titleObj = {};
                 titleObj.appName = this.items[0].appName;
                 titleObj.envName =  this.items[0].envName;
                 titleObj.version =  this.items[0].versionId;
+                this.titleObj = titleObj;
           });
       }
       },
@@ -258,6 +261,20 @@ export default {
       },
       batchDownload(){
           window.location.href=Url.BATCH_DOWNLOAD+"?appId="+this.appId+"&envId="+this.envId+"&version="+this.versionId;
+      },
+      showZkDetail(appId,envId,version){
+          if(this.hiddenZk == false){
+            var params ={}
+                params.appId = appId;
+                params.version = version;
+                params.envId = envId;
+                ajaxUtil.doGet(Url.ZK_INFO,params).then((xhr,response) => {
+                    this.zkDetail= response.result.hostInfo;
+                    this.hiddenZk =true;
+                });
+            }else{
+                this.hiddenZk = false;
+            }
       }
       
      

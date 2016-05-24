@@ -37,9 +37,19 @@
                                         <label  class=" control-label">版本:</label>
                                       <select class="form-control" v-model="version">
                                           <option  selected>选择版本</option>
+                                           <option value="#">自定义版本</option>
                                          <option v-for="item in versionList">{{item}}</option>
-
                                     </select>
+                                    
+                                </div>
+                             </div>
+                          
+                        </div>
+                        <div class="row" v-if="version == '#'">
+                            <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label  class=" control-label">自定义版本:</label>
+                                         <input type="text" class="form-control" v-model="customVersion"></input>
                                     
                                 </div>
                              </div>
@@ -144,7 +154,8 @@ export default {
      type:-1,
      fileName:null,
      fileContent:null,
-     versionList:[]
+     versionList:[],
+     customVersion:null
     }
   },
   components: {
@@ -189,9 +200,10 @@ export default {
               params.appId = this.appId;
               params.fileName = this.fileName;
               params.fileContent = this.fileContent;
-              params.version = this.version;
+              params.version = this.version == '#'?this.customVersion:this.version;
               params.envId = this.envId;
-              ajaxUtil.doPost(Url.CONFIG_TEXT,params).then((xhr,response) => {
+              var config={cache:true,headers:{'content-type':'application/x-www-form-urlencoded;charset=UTF-8'}};
+              ajaxUtil.doPost(Url.CONFIG_TEXT,params,config).then((xhr,response) => {
                
                 this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version,envId:this.envId}});
               });
@@ -201,7 +213,7 @@ export default {
                 var oData =  new FormData(this.$els.file);
                 oData.append("myfilerar",this.$els.file.files[0]);
                 oData.append("appId",this.appId);
-                oData.append("version",this.version);
+                oData.append("version", this.version == '#'?this.customVersion:this.version);
                 oData.append("envId",this.envId); 
                 qwest.post(Url.CONFIG_FILE,oData).then((xhr,response) => {
                     this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version,envId:this.envId}});

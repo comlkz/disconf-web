@@ -34,12 +34,22 @@
                         <div class="row">
                             <div class="col-sm-12">
                                     <div class="form-group">
-                                        <label  class=" control-label">版本:{{version|json}}</label>
+                                        <label  class=" control-label">版本:</label>
                                       <select class="form-control" v-model="version">
                                           <option  selected>选择版本</option>
                                          <option v-for="item in versionList">{{item}}</option>
-
+                                         <option value="#">自定义版本</option>
                                     </select>
+                                    
+                                </div>
+                             </div>
+                          
+                        </div>
+                          <div class="row" v-if="version == '#'">
+                            <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label  class=" control-label">自定义版本:</label>
+                                         <input type="text" class="form-control" v-model="customVersion"></input>
                                     
                                 </div>
                              </div>
@@ -111,7 +121,7 @@ export default {
     
   },
   ready () {
-   
+   this.loadAppData();
   },
   methods :{
 	  loadAppData(){
@@ -148,7 +158,7 @@ export default {
               params.appId = this.appId;
               params.key = this.key;
               params.value = this.value;
-              params.version = this.version;
+              params.version = this.version == '#'?customVersion:this.version;            
               params.envId = this.envId;
               console.log("params="+JSON.stringify(params))
               ajaxUtil.doPost(Url.CONFIG_ITEM,params).then((xhr,response) => {

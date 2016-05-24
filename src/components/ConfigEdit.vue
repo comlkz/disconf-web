@@ -23,14 +23,77 @@
                    <ol class="dd-list">
                         <li class="dd-item dd2-item dd-colored" data-id="13" v-for="(index,file) in fileList" :class="{'dd-colored':index == selectIndex}" @click="changeData(index,file.configId)">
                             
-                            <div class="dd2-content" :class="{'bg-info':index == selectIndex}">{{file.key}}</div>
+                            <div class="dd2-content" :class="{'bg-info':key == file.key}">{{file.key}}</div>
                         </li>
                      </ol>
                 </div>
             </div>
         </div>
         <div class="col-lg-9 col-sm-9 col-xs-12">
-            <div class="widget">
+        
+        <div class="widget" v-if="configType=='配置项'">
+                <div class="widget-header">
+                    <span class="widget-caption">配置项修改</span>
+                </div>
+                <div class="widget-body">
+                <div>
+                    <form >
+                        <div class="row">
+                             <div class="form-group">
+                                <label class="col-sm-3 control-label">APP id & 名称：</label>
+                                <span class="col-sm-9 control-label">
+                                    {{item.appName}}
+                                </span>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">版本：</label>
+                                <span class="col-sm-9 control-label">
+                                   {{item.version}}
+                                </span>
+                            </div>
+                          
+                        </div>
+                         <div class="row">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">环境：</label>
+                                <span class="col-sm-9 control-label">
+                                    {{item.envName}}
+                                </span>
+                            </div>
+                          
+                        </div>
+                        <div class="row">
+                           <div class="form-group">
+                                <label class="col-sm-3 control-label">配置KEY：</label>
+                                <span class="col-sm-9 control-label">
+                                    {{item.value}}
+                                </span>
+                            </div> 
+                       </div>
+                        <div class="row">
+                           <div class="form-group">
+                                <label class="col-sm-3 control-label">配置值：</label>
+                                <input type="text" class=" col-sm-9 form-control" v-model="configValue"></input>
+                            </div> 
+                       </div>
+                        
+                       <div class="row">
+                            <div class="col-sm-12">
+                           <button type="submit" class=" btn btn-blue" @click="saveProperty()">保存</button>
+                            <button type="submit" class=" btn btn-blue">取消</button>
+                           </div>
+                       </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            <div class="widget" v-else>
                 <div class="widget-header">
                     <span class="widget-caption">配置文件修改</span>
                 </div>
@@ -75,9 +138,12 @@
                         <div class="row">
                            <div class="form-group">
                                 <label class="col-sm-3 control-label">原配置文件内容：</label>
-                                <span class="col-sm-9 control-label" style="background-color:rgba(0, 0, 0, 0.15);">
+                                <!--<span class="col-sm-9 control-label" style="background-color:rgba(0, 0, 0, 0.15);">
                                     {{item.value}}
-                                </span>
+                                </span>-->
+                                <pre style="margin-right:50px;">
+                                    {{item.value}}
+                                </pre>
                             </div> 
                        </div>
                        <div class="row">
@@ -125,7 +191,13 @@
                        </div>
                        <div class="row">
                             <div class="col-sm-12">
-                           <button type="submit" class=" btn btn-blue" @click="saveProperty()">上传</button>
+                             <button type="submit" class=" btn btn-blue" @click="saveProperty()" v-if="type ==0">
+                               保存
+                           </button>
+                           <button type="submit" class=" btn btn-blue" @click="saveProperty()" v-if="type ==1">
+                               上传
+                           </button>
+                            <button type="submit" class=" btn btn-blue">取消</button>
                            </div>
                        </div>
                     </form>
@@ -154,6 +226,9 @@ export default {
      version:null,
      appId:null,
      envId:null,
+     key:null,
+     configType:null,
+     configValue:null
     }
   },
   components: {
@@ -174,8 +249,10 @@ export default {
                 this.item = infoObj.result;
                 this.appId = infoObj.result.appId;
                 this.envId = infoObj.result.envId;
-                this.version = infoObj.result.version
-                this.loadList(infoObj.result.appId,infoObj.result.envId,infoObj.result.version)
+                this.version = infoObj.result.version;
+                this.key = infoObj.result.key;
+                this.configType = infoObj.result.type;
+                this.loadList();
 
           });
       },
@@ -196,27 +273,38 @@ export default {
           this.loadData();
       },
       saveProperty(){
-          if(this.type == 0 ){
+          if(this.configType =='配置项'){
               var params ={}
-              params.fileContent = this.fileContent;
-              ajaxUtil.doPut(Url.UPDATE_TEXT+this.configId,params).then((xhr,response) => {
-                 
-                   this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version}});
+                    params.value = this.configValue;
+                    var config={cache:true,headers:{'content-type':'application/x-www-form-urlencoded;charset=UTF-8'}};
+                    ajaxUtil.doPut(Url.UPDATE_CONFIG+this.configId,params,config).then((xhr,response) => {
+                        
+                        this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version,envId:this.envId}});
 
-              });
+                    });
           }else{
-              var params ={}
-              params.fileContent = this.fileContent;
-                var oData =  new FormData(this.$els.file);
-                oData.append("myfilerar",this.$els.file.files[0]);
-                
-               
-                qwest.put(Url.UPDATE_FILE+this.configId,oData).then((xhr,response) => {
-                  
-                       this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version}});
+                if(this.type == 0 ){
+                    var params ={}
+                    params.fileContent = this.fileContent;
+                    var config={cache:true,headers:{'content-type':'application/x-www-form-urlencoded;charset=UTF-8'}};
+                    ajaxUtil.doPut(Url.UPDATE_TEXT+this.configId,params,config).then((xhr,response) => {
+                        
+                        this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version,envId:this.envId}});
 
-                });
-          }
+                    });
+                }else{
+                    var params ={}
+                    params.fileContent = this.fileContent;
+                        var oData =  new FormData(this.$els.file);
+                        oData.append("myfilerar",this.$els.file.files[0]);
+                        
+                        qwest.post(Url.UPDATE_FILE+this.configId,oData).then((xhr,response) => {
+                        
+                            this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version,envId:this.envId}});
+
+                        });
+                }
+           }
       }
   },
   watch:{
