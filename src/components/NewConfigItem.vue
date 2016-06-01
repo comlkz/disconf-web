@@ -23,7 +23,7 @@
                             <div class="col-sm-12">
                                 <div class="form-group">
                                     <label class="control-label">APP选择</label>
-                                    <select class="form-control" v-model="appId">
+                                    <select class="form-control"  v-select="appId">
                                          <option value="-1" selected>选择APP</option>
                                          <option v-for="item in appList" :value="item.id">{{item.name}}</option>
                                     </select>
@@ -35,7 +35,7 @@
                             <div class="col-sm-12">
                                     <div class="form-group">
                                         <label  class=" control-label">版本:</label>
-                                      <select class="form-control" v-model="version">
+                                      <select class="form-control"  v-select="version" >
                                           <option  selected>选择版本</option>
                                          <option v-for="item in versionList">{{item}}</option>
                                          <option value="#">自定义版本</option>
@@ -59,7 +59,7 @@
                             <div class="col-sm-12">
                                     <div class="form-group">
                                         <label  class=" control-label">环境：</label>
-                                       <select class="form-control" v-model="envId">
+                                       <select class="form-control"  v-select="envId"  >
                                            <option selected>选择环境</option>
                                            <option v-for="item in envList" :value="item.id">{{item.name}}</option>
 

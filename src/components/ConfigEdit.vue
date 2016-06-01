@@ -181,11 +181,12 @@
                         <div class="row" v-if="type == 1">
                            <div class="form-group">
                                 <label class="col-sm-3 control-label">上传配置文件：</label>
-                                
-                                  <label for="uploadFile" class="btn btn-palegreen">上传配置文件</label>
+                                 <label for="uploadFile"  v-if="fileValue!=null">{{fileValue}}</label>
+                                 <label for="uploadFile" class="btn btn-palegreen">上传配置文件</label>
+
                                  <form enctype="multipart/form-data">
-                                       <input id="uploadFile" type="file"  class="inputfile"  v-el:file >
-                                  </form>
+                                       <input id="uploadFile" type="file"  class="inputfile"  v-el:file v-on:change="setFile()">
+                                  </form>                            </div>
                             </div>
                            
                        </div>
@@ -228,7 +229,8 @@ export default {
      envId:null,
      key:null,
      configType:null,
-     configValue:null
+     configValue:null,
+     fileValue:null,
     }
   },
   components: {
@@ -272,6 +274,15 @@ export default {
           this.configId = configId;
           this.loadData();
       },
+      setFile(){
+         var value= this.$els.file.value;
+         var t1 = value.lastIndexOf("\\");  
+         if(t1 >= 0 && t1 < value.length){  
+             this.fileValue=value.substring(t1 + 1);
+            }
+            
+      
+  },
       saveProperty(){
           if(this.configType =='配置项'){
               var params ={}

@@ -23,7 +23,7 @@
                             <div class="col-sm-12">
                                 <div class="form-group">
                                     <label class="control-label">APP选择</label>
-                                    <select class="form-control" v-model="appId">
+                                    <select  class="form-control" v-select="appId">
                                          <option value="-1" selected>选择APP</option>
                                          <option v-for="item in appList" :value="item.id">{{item.name}}</option>
                                     </select>
@@ -35,7 +35,7 @@
                             <div class="col-sm-12">
                                     <div class="form-group">
                                         <label  class=" control-label">版本:</label>
-                                      <select class="form-control" v-model="version">
+                                      <select class="form-control"  v-select="version">
                                           <option  selected>选择版本</option>
                                            <option value="#">自定义版本</option>
                                          <option v-for="item in versionList">{{item}}</option>
@@ -59,7 +59,7 @@
                             <div class="col-sm-12">
                                     <div class="form-group">
                                         <label  class=" control-label">环境：</label>
-                                       <select class="form-control" v-model="envId">
+                                       <select class="form-control"   v-select="envId">
                                            <option selected>选择环境</option>
                                            <option v-for="item in envList" :value="item.id">{{item.name}}</option>
 
@@ -114,11 +114,13 @@
                         </div>
                         
                         <div class="row" v-if="type == 1">
-                           <div class="form-group">
+                           <div class="form-group">   
                                 <label class="col-sm-3 control-label">上传配置文件：</label>
+                               <label for="uploadFile"  v-if="fileValue!=null">{{fileValue}}</label>
                                  <label for="uploadFile" class="btn btn-palegreen">上传配置文件</label>
+
                                  <form enctype="multipart/form-data">
-                                       <input id="uploadFile" type="file"  class="inputfile"  v-el:file >
+                                       <input id="uploadFile" type="file"  class="inputfile"  v-el:file v-on:change="setFile()">
                                   </form>                            </div>
                            
                        </div>
@@ -153,6 +155,7 @@ export default {
      envList:[],
      type:-1,
      fileName:null,
+     fileValue:null,
      fileContent:null,
      versionList:[],
      customVersion:null
@@ -219,6 +222,14 @@ export default {
                     this.$router.go({ path: '/configList', query: { appId:this.appId ,version:this.version,envId:this.envId}});
                 });
           }
+      },
+      setFile(){
+         var value= this.$els.file.value;
+         var t1 = value.lastIndexOf("\\");  
+         if(t1 >= 0  && t1 < value.length){  
+             this.fileValue=value.substring(t1 + 1);
+            }
+            
       }
   },
   watch:{
